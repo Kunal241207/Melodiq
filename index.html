@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Melodiq</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<header>
+  <h1>melodi<span>q</span></h1>
+  <input id="searchInput" type="text" placeholder="Search songs..." />
+</header>
+
+<div class="container">
+  <h2>All Tracks</h2>
+
+  <div id="loader" class="hidden">Loading...</div>
+
+  <table id="songsTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>Time</th>
+        <th>Preview</th>
+      </tr>
+    </thead>
+    <tbody id="songsBody"></tbody>
+  </table>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

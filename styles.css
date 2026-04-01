@@ -1,0 +1,119 @@
+body {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  background: #0a0a0f;
+  color: #fff;
+}
+
+header {
+  padding: 20px;
+  border-bottom: 1px solid #222;
+  text-align: center;
+}
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 35px;
+}
+
+h1 span {
+  color: #c8f73e;
+}
+
+input {
+  margin-top: 10px;
+  padding: 10px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 8px;
+  border: none;
+  background: #181820;
+  color: white;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  text-align: left;
+  color: #888;
+  font-size: 14px;
+}
+
+th {
+  padding: 10px;
+  border-bottom: 1px solid #222;
+}
+
+td {
+  padding: 12px 10px;
+}
+
+tr {
+  transition: background 0.2s;
+}
+
+tr:hover {
+  background: #181820;
+}
+
+.song-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.song-info img {
+  width: 45px;
+  height: 45px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.title {
+  font-size: 14px;
+}
+
+.artist {
+  font-size: 12px;
+  color: #888;
+}
+
+td:nth-child(3){
+  padding-left: 70px;
+}
+td:nth-child(4) {
+  text-align: right;
+}
+
+th:nth-child(3),th:nth-child(4){
+  text-align: center;
+}
+
+audio {
+  width: 145px;
+  height: 28px;
+  opacity: 0.9;
+  border-radius: 20px;
+}
+
+#loader {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.hidden {
+  display: none;
+}
