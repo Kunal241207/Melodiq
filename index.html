@@ -16,7 +16,20 @@
 </header>
 
 <div class="container">
-  <h2>All Tracks</h2>
+  <div class="toolbar">
+    <div class="tabs">
+      <button class="tab active" id="allTab">All Tracks</button>
+      <button class="tab" id="likedTab">♡ Liked <span id="likedCount">0</span></button>
+    </div>
+    <select id="sortSelect">
+      <option value="default">Sort: Default</option>
+      <option value="az">A-Z</option>
+      <option value="za">Z-A</option>
+      <option value="dur">Duration</option>
+    </select>
+  </div>
+
+  <div id="genreBar"></div>
 
   <div id="loader" class="hidden">Loading...</div>
 
@@ -25,8 +38,10 @@
       <tr>
         <th>#</th>
         <th>Title</th>
+        <th>Genre</th>
         <th>Time</th>
         <th>Preview</th>
+        <th>Liked</th>
       </tr>
     </thead>
     <tbody id="songsBody"></tbody>
