@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Melodiq</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
 </head>
@@ -23,8 +22,8 @@
     </div>
     <select id="sortSelect">
       <option value="default">Sort: Default</option>
-      <option value="az">A-Z</option>
-      <option value="za">Z-A</option>
+      <option value="az">A → Z</option>
+      <option value="za">Z → A</option>
       <option value="dur">Duration</option>
     </select>
   </div>
@@ -33,7 +32,7 @@
 
   <div id="loader" class="hidden">Loading...</div>
 
-  <table id="songsTable">
+  <table>
     <thead>
       <tr>
         <th>#</th>

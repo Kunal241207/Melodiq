@@ -9,7 +9,7 @@ This project uses the iTunes Search API, which provides free access to music dat
 - Search for songs, artists, or albums
 - Listen to short music previews
 - Like and save your favorite tracks
-- View basic stats like total songs and duration
+- Filter by genre and sort by name or duration
 
 ### Technologies
 
@@ -21,3 +21,22 @@ This project uses the iTunes Search API, which provides free access to music dat
 
 - Download or clone the project
 - Open `index.html` in your browser
+
+### API 
+
+- iTunes: `https://itunes.apple.com/search?term={search_query}&entity=song`
+
+### Response Example
+
+Only relevant fields are shown: 
+
+```
+{
+  "trackName": "Kesariya",
+  "artistName": "Arijit Singh",
+  "primaryGenreName": "Bollywood",
+  "trackTimeMillis": 268000,
+  "artworkUrl100": "https://is1-ssl.mzstatic.com/image/.../100x100bb.jpg",
+  "previewUrl": "https://audio-ssl.itunes.apple.com/itunes-assets/..."
+}
+```

@@ -1,141 +1,172 @@
 const table = document.getElementById("songsBody")
 const input = document.getElementById("searchInput")
-const load = document.getElementById("loader")
-const genreBar = document.getElementById("genreBar")
-const sort = document.getElementById("sortSelect")
+const loader = document.getElementById("loader")
+const genreBox = document.getElementById("genreBar")
+const sortSelect = document.getElementById("sortSelect")
 
-let songs = []
-let liked = []
+let allSongs = []
+let likedSongs = []
 let genre = "All"
 let mode = "all"
 
-async function getSongs(q) {
-  load.classList.remove("hidden")
+async function loadSongs(text) {
+  loader.classList.remove("hidden")
   table.innerHTML = ""
 
-  let res = await fetch(`https://itunes.apple.com/search?term=${q}&entity=song&limit=20&country=IN`)
-  songs = (await res.json()).results
+  const res = await fetch(`https://itunes.apple.com/search?term=${text}&entity=song&limit=20&country=IN`)
+  allSongs = (await res.json()).results
+
   genre = "All"
   showGenres()
   showSongs()
 
-  load.classList.add("hidden")
+  loader.classList.add("hidden")
 }
 
 function showGenres() {
-  let d = mode === "liked" ? songs.filter(s => liked.indexOf(s.trackId) !== -1) : songs
+  const list = mode === "liked"
+    ? allSongs.filter(song => likedSongs.includes(song.trackId))
+    : allSongs
 
-  let obj = {}
-  d.forEach(s => {
-    let g = s.primaryGenreName || "Other"
-    obj[g] = (obj[g] || 0) + 1
+  const count = {}
+  list.forEach(song => {
+    const g = song.primaryGenreName || "Other"
+    count[g] = (count[g] || 0) + 1
   })
 
-  let arr = ["All"]
-  Object.keys(obj).forEach(g => arr.push(g))
+  const names = ["All", ...Object.keys(count)]
 
-  genreBar.innerHTML = arr.map(g =>
-    `<button class="${g === genre ? "active" : ""}">${g}</button>`
+  genreBox.innerHTML = names.map(name =>
+    `<button class="${name === genre ? "active" : ""}">${name}</button>`
   ).join("")
 
-  genreBar.querySelectorAll("button").forEach((b, i) => {
-    b.addEventListener("click", function () {
-      genre = arr[i]
-      showGenres()
+  genreBox.querySelectorAll("button").forEach((btn, ind) =>
+    btn.addEventListener("click", () => {
+      genre = names[ind]
       showSongs()
+      showGenres()
     })
-  })
+  )
+}
+
+function time(ms) {
+  const t = Math.floor((ms || 0) / 1000)
+  const m = Math.floor(t / 60)
+  let s = t % 60
+  if (s < 10) s = "0" + s
+  return m + ":" + s
+}
+
+function img(url) {
+  if (!url) return ""
+  return url.replace("100x100", "700x700")
+}
+
+function liked(id) {
+  return likedSongs.includes(id)
 }
 
 function showSongs() {
-  let d = songs
+  let list = [...allSongs]
 
-  if (mode === "liked") d = d.filter(s => liked.indexOf(s.trackId) !== -1)
-  if (genre !== "All") d = d.filter(s => s.primaryGenreName === genre)
+  if (mode === "liked") {
+    list = list.filter(song => liked(song.trackId))
+  }
+  if (genre !== "All") {
+    list = list.filter(song => song.primaryGenreName === genre)
+  }
 
-  if (sort.value === "az") d.sort((a, b) => (a.trackName > b.trackName ? 1 : -1))
-  if (sort.value === "za") d.sort((a, b) => (a.trackName < b.trackName ? 1 : -1))
-  if (sort.value === "dur") d.sort((a, b) => (b.trackTimeMillis || 0) - (a.trackTimeMillis || 0))
+  if (sortSelect.value === "az") {
+    list.sort((a, b) => a.trackName > b.trackName ? 1 : -1)
+  } else if (sortSelect.value === "za") {
+    list.sort((a, b) => a.trackName < b.trackName ? 1 : -1)
+  } else if (sortSelect.value === "dur") {
+    list.sort((a, b) => (b.trackTimeMillis || 0) - (a.trackTimeMillis || 0))
+  }
 
-  if (!d.length) {
+  if (!list.length) {
     table.innerHTML = "<tr><td>No results</td></tr>"
     return
   }
 
-  table.innerHTML = d.map((s, i) => {
-    let img = s.artworkUrl100
-    if (img) {
-      let p = img.indexOf("100x100")
-      if (p !== -1) img = img.slice(0, p) + "700x700" + img.slice(p + 7)
-    }
-
-    let t = Math.floor((s.trackTimeMillis || 0) / 1000)
-    let m = Math.floor(t / 60)
-    let sec = t % 60
-    if (sec < 10) sec = "0" + sec
-
-    let like = liked.indexOf(s.trackId) !== -1 ? "❤️" : "♡"
+  table.innerHTML = list.map((song, i) => {
+    let likeIcon = "♡"
+    if (liked(song.trackId)) likeIcon = "❤️"
 
     return `
       <tr>
-      <td>${i + 1}</td>
-      <td>
-      <div class="song-info">
-      <img src="${img}">
-      <div>
-      <div class="title">${s.trackName || "No name"}</div>
-      <div class="artist">${s.artistName || "Unknown"}</div>
-      </div>
-      </div>
-      </td>
-      <td><span class="genre-tag">${s.primaryGenreName || "-"}</span></td>
-      <td>${m}:${sec}</td>
-      <td><audio controls src="${s.previewUrl}"></audio></td>
-      <td><button class="like-btn">${like}</button></td>
-      </tr>`
-        }).join("")
+        <td>${i + 1}</td>
+        <td>
+          <div class="song-info">
+            <img src="${img(song.artworkUrl100)}">
+            <div>
+              <div class="title">${song.trackName || "No name"}</div>
+              <div class="artist">${song.artistName || "Unknown"}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="genre-tag">${song.primaryGenreName || "-"}</span></td>
+        <td>${time(song.trackTimeMillis)}</td>
+        <td><audio controls src="${song.previewUrl}"></audio></td>
+        <td><button class="like-btn">${likeIcon}</button></td>
+      </tr>
+    `
+  }).join("")
 
-  table.querySelectorAll(".like-btn").forEach((b, i) => {
-    b.addEventListener("click", function () {
-      let id = d[i].trackId
+  table.querySelectorAll(".like-btn").forEach((btn, i) => {
+    btn.addEventListener("click", () => {
+      const id = list[i].trackId
 
-      if (liked.indexOf(id) !== -1) {
-        liked = liked.filter(x => x !== id)
+      if (liked(id)) {
+        likedSongs = likedSongs.filter(x => x !== id)
       } else {
-        liked.push(id)
+        likedSongs.push(id)
       }
 
-      document.getElementById("likedCount").innerText = liked.length
+      document.getElementById("likedCount").innerText = likedSongs.length
+
       if (mode === "liked") showGenres()
       showSongs()
     })
   })
+
+  const audios = table.querySelectorAll("audio")
+  audios.forEach(curr => {
+    curr.addEventListener("play", () => {
+      audios.forEach(a => {
+        if (a !== curr) a.pause()
+      })
+    })
+  })
 }
 
-document.getElementById("allTab").addEventListener("click", function () {
+document.getElementById("allTab").addEventListener("click", () => {
   mode = "all"
   genre = "All"
+  allTab.classList.add("active")
+  likedTab.classList.remove("active")
   showGenres()
   showSongs()
 })
 
-document.getElementById("likedTab").addEventListener("click", function () {
+document.getElementById("likedTab").addEventListener("click", () => {
   mode = "liked"
   genre = "All"
+  likedTab.classList.add("active")
+  allTab.classList.remove("active")
   showGenres()
   showSongs()
 })
 
-sort.addEventListener("change", showSongs)
+sortSelect.addEventListener("change", showSongs)
 
-input.addEventListener("input", function () {
-  let val = input.value
-
-  while (val[0] === " ") val = val.slice(1)
-  while (val[val.length - 1] === " ") val = val.slice(0, val.length - 1)
-
-  if (val.length > 0) getSongs(val)
-  else table.innerHTML = ""
+input.addEventListener("input", () => {
+  const v = input.value.trim()
+  if (v) {
+    loadSongs(v)
+  } else {
+    loadSongs("top hits 2025")
+  }
 })
 
-getSongs("top hits 2025")
+loadSongs("top hits 2025")

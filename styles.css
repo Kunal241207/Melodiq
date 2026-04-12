@@ -27,6 +27,7 @@ input {
   max-width: 400px;
   border-radius: 8px;
   border: none;
+  outline: none;
   background: #181820;
   color: #fff;
 }
@@ -48,14 +49,18 @@ input {
   gap: 8px;
 }
 
-.tab {
-  padding: 7px 16px;
+.tab,
+#genreBar button {
   border: 1px solid #333;
   border-radius: 8px;
   background: transparent;
   color: #888;
-  font-size: 14px;
   cursor: pointer;
+}
+
+.tab {
+  padding: 7px 16px;
+  font-size: 14px;
 }
 
 .tab span {
@@ -68,7 +73,9 @@ input {
 }
 
 .tab.active,
-.tab:hover {
+.tab:hover,
+#genreBar button.active,
+#genreBar button:hover {
   background: #c8f73e;
   border-color: #c8f73e;
   color: #000;
@@ -94,23 +101,17 @@ input {
 #genreBar button {
   padding: 5px 12px;
   border-radius: 20px;
-  border: 1px solid #333;
-  background: transparent;
-  color: #888;
   font-size: 13px;
-  cursor: pointer;
-}
-
-#genreBar button:hover,
-#genreBar button.active {
-  background: #c8f73e;
-  border-color: #c8f73e;
-  color: #000;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 10px;
+  text-align: left;
 }
 
 thead {
@@ -119,12 +120,7 @@ thead {
 }
 
 th {
-  padding: 10px;
   border-bottom: 1px solid #222;
-}
-
-td {
-  padding: 12px 10px;
 }
 
 tr:hover {
@@ -175,20 +171,11 @@ tr:hover {
 }
 
 th:nth-child(4),
-td:nth-child(4) {
-  text-align: center;
-}
-
-td:nth-child(5) {
-  color: #888;
-  font-size: 13px;
-}
-
+td:nth-child(4),
+th:nth-child(5),
+td:nth-child(5),
+th:nth-child(6),
 td:nth-child(6) {
-  text-align: right;
-}
-
-th:nth-child(6) {
   text-align: center;
 }
 
