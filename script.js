@@ -24,7 +24,7 @@ function img(url) {
 }
 
 function liked(id) {
-  return likedSongs.includes(id)
+  return likedSongs.some(s => s.id === id)
 }
 
 function esc(str) {
@@ -48,9 +48,8 @@ async function loadSongs(text) {
 
     allSongs = data.results
       .filter(song => song.wrapperType === "track" && song.kind === "song")
-      .map((song, i) => ({
+      .map((song) => ({
         id: song.trackId,
-        idx: i,
         name: song.trackName || "Unknown",
         artist: song.artistName || "Unknown Artist",
         album: song.collectionName || "",
@@ -94,7 +93,7 @@ function updateStats() {
 }
 
 function showGenres() {
-  let songs = mode === "liked" ? allSongs.filter(s => liked(s.id)) : [...allSongs]
+  let songs = mode === "liked" ? [...likedSongs] : [...allSongs]
 
   let counts = {}
   songs.forEach(s => counts[s.genre] = (counts[s.genre] || 0) + 1)
@@ -117,7 +116,7 @@ function setGenre(selectedGenre) {
 function showSongs() {
   let list = [...allSongs]
 
-  if (mode === "liked") list = list.filter(s => liked(s.id))
+  if (mode === "liked") list = [...likedSongs]
   if (genre !== "All") list = list.filter(s => s.genre === genre)
 
   let q = input.value.trim().toLowerCase()
@@ -153,10 +152,10 @@ function renderList(tracks) {
   if (tracks.length === 0) { table.innerHTML = emptyHTML(); return }
 
   let rows = tracks.map((song, i) => {
-    let playing = currentSongIndex === song.idx
+    let playing = currentSongIndex === song.id
     let faved = liked(song.id)
     return `
-      <tr class="track-row${playing ? " playing" : ""}" onclick="playTrack(${song.idx})">
+      <tr class="track-row${playing ? " playing" : ""}" onclick="playTrack(${song.id})">
         <td class="track-num">${playing ? "▶" : i + 1}</td>
         <td>
           <div class="track-info-cell">
@@ -198,12 +197,12 @@ function renderGrid(tracks) {
   if (tracks.length === 0) { table.innerHTML = emptyHTML(); return }
 
   let cards = tracks.map(song => {
-    let playing = currentSongIndex === song.idx
+    let playing = currentSongIndex === song.id
     let faved = liked(song.id)
     let border = playing ? "#c8f73e" : "rgba(255,255,255,0.07)"
     let nameCol = playing ? "#c8f73e" : "#f0f0ee"
     return `
-      <div onclick="playTrack(${song.idx})" style="cursor:pointer;background:#111118;border-radius:12px;overflow:hidden;border:1px solid ${border};transition:border-color .15s;padding-bottom:12px;">
+      <div onclick="playTrack(${song.id})" style="cursor:pointer;background:#111118;border-radius:12px;overflow:hidden;border:1px solid ${border};transition:border-color .15s;padding-bottom:12px;">
         <img src="${song.artLarge}" alt="" style="width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#22222e" onerror="this.style.background='#22222e'" loading="lazy"/>
         <div style="padding:10px 12px 0;">
           <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:${nameCol}">${esc(song.name)}</div>
@@ -219,10 +218,10 @@ function renderGrid(tracks) {
   table.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;">${cards}</div>`
 }
 
-function playTrack(idx) {
-  if (idx < 0 || idx >= allSongs.length) return
-  let song = allSongs[idx]
-  currentSongIndex = idx
+function playTrack(id) {
+  let song = allSongs.find(s => s.id === id) || likedSongs.find(s => s.id === id)
+  if (!song) return
+  currentSongIndex = id
 
   let art = document.getElementById("player-art")
   art.src = song.artLarge
@@ -256,19 +255,22 @@ function togglePlay() {
 
 function playNext() {
   if (allSongs.length === 0) return
-  playTrack((currentSongIndex + 1) % allSongs.length)
+  let i = allSongs.findIndex(s => s.id === currentSongIndex)
+  playTrack(allSongs[(i + 1) % allSongs.length].id)
 }
 
 function playPrev() {
   if (allSongs.length === 0) return
-  playTrack((currentSongIndex - 1 + allSongs.length) % allSongs.length)
+  let i = allSongs.findIndex(s => s.id === currentSongIndex)
+  playTrack(allSongs[(i - 1 + allSongs.length) % allSongs.length].id)
 }
 
 function seekTo(event) {
   if (!audio.duration || currentSongIndex === -1) return
-  let totalDur = allSongs[currentSongIndex].duration
+  let song = allSongs.find(s => s.id === currentSongIndex) || likedSongs.find(s => s.id === currentSongIndex)
+  if (!song) return
   let pct = event.offsetX / document.getElementById("progress-bar").offsetWidth
-  audio.currentTime = Math.min(pct * totalDur, audio.duration)
+  audio.currentTime = Math.min(pct * song.duration, audio.duration)
 }
 
 function setVolume(volume) {
@@ -281,8 +283,9 @@ function updatePlayIcon() {
 
 function updateProgress() {
   if (currentSongIndex === -1) return
-  let totalDur = allSongs[currentSongIndex].duration
-  let pct = totalDur ? (audio.currentTime / totalDur) * 100 : 0
+  let song = allSongs.find(s => s.id === currentSongIndex) || likedSongs.find(s => s.id === currentSongIndex)
+  if (!song) return
+  let pct = song.duration ? (audio.currentTime / song.duration) * 100 : 0
   document.getElementById("progress-fill").style.width = pct + "%"
   document.getElementById("time-cur").textContent = time(audio.currentTime)
 }
@@ -295,10 +298,10 @@ setInterval(updateProgress, 100)
 function toggleFav(event, id) {
   event.stopPropagation()
   if (liked(id)) {
-    likedSongs = likedSongs.filter(songId => songId !== id)
+    likedSongs = likedSongs.filter(s => s.id !== id)
     showToast("Removed from liked songs")
   } else {
-    likedSongs.push(id)
+    likedSongs.push(allSongs.find(s => s.id === id))
     showToast("Added to liked songs ♥")
   }
   localStorage.setItem("my_favs", JSON.stringify(likedSongs))
@@ -372,7 +375,7 @@ function emptyHTML() {
   if (mode === "liked") {
     return `
       <div class="empty-state">
-        <div class="icon">♡</div>
+        <div class="icon" style="font-size:4rem">𓆩♡𓆪</div>
         <h3>No liked songs yet</h3>
         <p>Like a track to save it here.</p>
       </div>`
